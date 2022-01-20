@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style>
+li {
+  font-family: 'Courier New', monospace;
+  font-size: 36px;
+}
+.btn {
+  margin: -9px;
+  padding: 0;
+  border: none;
+  background-color: inherit;
+  font-size: 36px;
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+}
+
+/* New Game Button */
+.ng {
+  margin: 0px;
+  padding: 12px;
+  background-color: green;
+  color: white;
+  border-radius: 50px;
+  font-family: 'Helvetica', sans-serif;
+  font-size: 16px;
+}
+
+.ng:hover {
+  background-color: #04AA6D;
+}
+
+/* Tic Tac Toe Cell Buttons */
+.cell {
+  color: #216fff;
+}
+
+.cell:hover {
+  background-color: #219fff;
+  color: white;
+}
+
+</style>
+<script>
+'use strict';
+
+class Game {
+  constructor() {
+    this.board = [
+      ['-', '-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-', '-'],
+      ['-', '-', '-', '-', '-', '-']
+    ];
+    this.turn      = 1;
+    this.move      = 0;
+
+    /*Tells you how tall each column is. In other words, tells you
+    which row to add to */
+    this.columnTracker = [0, 0, 0, 0, 0, 0, 0];
+  }
+
+  reset() {
+    location.reload();
+  }
+
+  disableButtons() {
+    for(let id = 0; id <= 6; id++) {
+      document.getElementById(buttonIDs[id]).disabled = true;
+    }
+  }
+  //returns column as a string
+  getColumn(col) {
+    let _col = '';
+    for(let y = 0; y < 6; y++) {
+      _col += this.board[col][y];
+    }
+    return _col;
+  }
+
+  //returns row as a string
+  getRow(row) {
+    let _row = '';
+    for(let x = 0; x < 7; x++) {
+      _row += this.board[x][row];
+    }
+    return _row;
+  }
+
+  //returns a diagonal beginning from the bottom as a string
+  getBottomDiag(bottom_tail_col) {
+    let diag = '';
+    let row = 0;
+    let col = bottom_tail_col;
+
+    if(col <= 3) {
+      while(col <= 6 && row <= 5) {
+        diag += this.board[col][row];
+        col++;
+        row++;
+      }
+    } else {
+      while(col >= 0 && row <= 5) {
+        diag += this.board[col][row];
+        col--;
+        row++;
+      }
+    }
+    return diag;
+  }
+
+  //returns a diagonal beginning from the top as a string
+  getTopDiag(top_tail_col) {
+    let diag = '';
+    let row = 5;
+    let col = top_tail_col;
+
+    if(col <= 3) {
+      while(col <= 6 && row >= 0) {
+        diag += this.board[col][row];
+        col++;
+        row--;
+      }
+    } else {
+      while(col >= 0 && row >= 0) {
+        diag += this.board[col][row];
+        col--;
+        row--;
+      }
+    }
+    return diag;
+  }
+
+  //checks for a Winner
+  checkForWinner() {
+    //check all columns for a win
+    for(let col = 0; col < 7; col++) {
+      let _col = this.getColumn(col);
+      if(_col.includes("XXXX")) {
+        alert("X Wins");
+        this.disableButtons();
+        return;
+      }
+      else if(_col.includes("OOOO")) {
+        alert("O Wins");
+        this.disableButtons();
+        return;
+      }
+    }
+
+    //check all rows for a win
+    for(let row = 0; row < 6; row++) {
+      let _row = this.getRow(row);
+      if(_row.includes("XXXX")) {
+        alert("X Wins");
+        this.disableButtons();
+        return;
+      }
+      else if(_row.includes("OOOO")) {
+        alert("O Wins");
+        this.disableButtons();
+        return;
+      }
+    }
+
+    //check all diagonals for a win
+    for(let col = 0; col <= 5; col++) {
+      let ldiag = this.getBottomDiag(col);
+      let rdiag = this.getTopDiag(col);
+      if(ldiag.includes("XXXX") || rdiag.includes("XXXX")) {
+        alert("X Wins");
+        this.disableButtons();
+        return;
+      }
+      else if(ldiag.includes("OOOO") || rdiag.includes("OOOO")) {
+        alert("O Wins");
+        this.disableButtons();
+        return;
+      }
+    }
+  }
+
+  //Updates the row on the screen when a move is made.
+  updateRow(row) {
+    let newRow = '';
+    for(let col = 0; col < 7; col++) {
+      newRow += '[';
+      newRow += this.board[col][row];
+      newRow += ']';
+    }
+    document.getElementById(rowIDs[row]).innerHTML = newRow;
+  }
+
+  //Updates the board data and the screen when a button is clicked.
+  updateBoardData(col) {
+    this.move++;
+
+    let row = this.columnTracker[col];
+    if(this.turn == 1) {
+      this.board[col][row] = 'X';
+    } else if(this.turn == -1) {
+      this.board[col][row] = 'O';
+    }
+
+    this.updateRow(row);
+    this.columnTracker[col]++;
+
+    this.turn *= -1;
+
+    // Now check if someone won
+    if(this.move >= 7){
+      this.checkForWinner();
+    }
+  }
+}
+
+//Button ids
+const buttonIDs = ["zero",
+                   "one",
+                   "two",
+                   "three",
+                   "four",
+                   "five",
+                   "six"
+]
+
+const rowIDs = ["row1",
+                "row2",
+                "row3",
+                "row4",
+                "row5",
+                "row6"]
+
+let newGame = new Game();
+
+</script>
+</head>
+<body>
+  <h1>Connect Four</h1>
+
+  <p> <b> Instructions: </b>  Click any of the buttons labeled "[Number]" to drop an "X" or "O" (turn dependent) into the desired column.
+    As gravity applies, your letter will fall on top of the highest letter in the column. "X" automatically goes first.
+    When the game is concluded, click the "New Game" button to reset. Have fun! </p>
+
+  <p>
+    <button id = "New Game" class="btn ng" onclick = "newGame.reset();">New Game</button>
+  </p>
+
+  <!-- Shows the board. 1 is the bottom row. -->
+  <ul style="list-style-type:none;">
+    <li id = "row6"> [-][-][-][-][-][-][-]</li>
+    <li id = "row5"> [-][-][-][-][-][-][-]</li>
+    <li id = "row4"> [-][-][-][-][-][-][-]</li>
+    <li id = "row3"> [-][-][-][-][-][-][-]</li>
+    <li id = "row2"> [-][-][-][-][-][-][-]</li>
+    <li id = "row1"> [-][-][-][-][-][-][-]</li>
+    <li id = "buttons">
+      <button id = "zero"  class="btn cell" onclick = "newGame.updateBoardData(0);">[1]</button>
+      <button id = "one"   class="btn cell" onclick = "newGame.updateBoardData(1);">[2]</button>
+      <button id = "two"   class="btn cell" onclick = "newGame.updateBoardData(2);">[3]</button>
+      <button id = "three" class="btn cell" onclick = "newGame.updateBoardData(3);">[4]</button>
+      <button id = "four"  class="btn cell" onclick = "newGame.updateBoardData(4);">[5]</button>
+      <button id = "five"  class="btn cell" onclick = "newGame.updateBoardData(5);">[6]</button>
+      <button id = "six"   class="btn cell" onclick = "newGame.updateBoardData(6);">[7]</button>
+    </li>
+  </ul>
+
+
+</body>
+</html>
